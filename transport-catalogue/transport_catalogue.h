@@ -10,23 +10,28 @@
 
 #include "geo.h"
 
-class Transport {
+class TransportCatalogue {
 public:
 	struct Stop {
-		Stop(std::string name, double x, double y) :name_(name){
-			coordinate.lat = x;
-			coordinate.lng = y;
-		}
+		Stop(std::string name, double x, double y);
 		std::string name_;
 		Coordinates coordinate;
 	};
 
 	struct Bus {
-		Bus(std::string name, std::vector<Stop*> stop) :name_(name) {
-			stops_.insert(stops_.begin(),make_move_iterator(stop.begin()), make_move_iterator(stop.end()));
-		}
+		Bus(std::string name, std::vector<Stop*> stop, double length_, double curve_);
 		std::string name_;
 		std::vector<Stop*> stops_;
+		double length;
+		double curve;
+	};
+
+	struct BusInfo {
+		BusInfo(int stops_, int uniq_stops_, double full_distance_, double curve_);
+		int stops;
+		int uniq_stops;
+		double full_distance;
+		double curve;
 	};
 	class StopPairHash {
 	public:
@@ -40,9 +45,7 @@ public:
 
 	class BusCompar {
 	public:
-		bool operator()(const Bus* lhs, const Bus* rhs) const {
-			return lhs->name_ < rhs->name_;
-		}
+		bool operator()(const Bus* lhs, const Bus* rhs) const;
 	};
 
 		void AddStop(std::string stop_name, double latit, double longit);
@@ -52,7 +55,7 @@ public:
 		bool BusCount(std::string_view bus_name) const;
 		bool StopCount(std::string_view stop_name) const;
 
-		std::tuple<int, int, double, double> GetBusInfo(std::string_view bus_name);
+		BusInfo GetBusInfo(std::string_view bus_name);
 		std::set<std::string_view>& GetStopInfo(std::string_view stop_name);
 		double GetLength(Stop* stop1, Stop* stop2);
 		double GetRealLength(Stop* stop1, Stop* stop2);

@@ -5,10 +5,7 @@
 using namespace std;
 
 int main() {
-	Transport SPB;
-	int num;
-	cin >> num;
-	Input::AddInf(cin, num, SPB);
-	cin >> num;
-	Output::Inf(cin, num, SPB);
+	TransportCatalogue SPB;
+	Input::ReadCatalogue(cin, SPB);
+	Output::Inf(cin,cout, SPB);
 }

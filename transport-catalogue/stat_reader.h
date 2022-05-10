@@ -7,5 +7,7 @@
 #include <iomanip>
 
 namespace Output {
-	void Inf(std::istream& input, int numb_of_lines, Transport& city);
+	void Inf(std::istream& input, std::ostream& out, TransportCatalogue& city);
+	void BusOut(std::istream& input, TransportCatalogue& city);
+	void StopOut(std::istream& input, TransportCatalogue& city);
 }

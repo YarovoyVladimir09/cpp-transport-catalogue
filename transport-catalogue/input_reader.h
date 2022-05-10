@@ -7,14 +7,14 @@
 #include <sstream>
 
 namespace Input {
-	void AddInf(std::istream& input, int numb_of_lines, Transport& city);
+	void ReadCatalogue(std::istream& input, TransportCatalogue& city);
 	namespace detail {
-		std::string_view SpaceClear(std::string_view word_to_clear);
+		std::string_view Trim(std::string_view word_to_clear);
 	}
 
 	namespace Split {
-		std::pair<std::string_view, std::string_view> OnChar(std::string_view word_to_split, char split_char);
-		std::vector<std::string_view> OnVector(std::string_view line, char split_char);
-		void StopReq(std::string_view line, Transport& city, std::vector<std::tuple<std::string, std::string, double>>& stops_info);
+		std::pair<std::string_view, std::string_view> IntoPair(std::string_view word_to_split, char split_char);
+		std::vector<std::string_view> Split(std::string_view line, char split_char);
+		void ParseStop(std::string_view line, TransportCatalogue& city, std::vector<std::tuple<std::string, std::string, double>>& stops_info);
 	}
 }
