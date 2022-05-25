@@ -87,9 +87,9 @@ struct Label {
     svg::Point offset = {0,0};
 };
 
-class MapRenderObj {
+class MapRender {
 public: 
-    MapRenderObj(SphereProjector& proj, double line_w, double rad,
+    MapRender(SphereProjector& proj, double line_w, double rad,
         Label& bus_l, Label& stop_l, svg::Color underlayer, double underlayer_w,
         std::vector<svg::Color>& colors):
     proj_(proj),line_w_(line_w), stop_rad_(rad),bus_(bus_l),

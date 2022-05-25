@@ -4,6 +4,24 @@ using namespace std;
 
 namespace json {
 
+    RenderContext::RenderContext(std::ostream& out)
+        : out(out) {
+    }
+    RenderContext::RenderContext(std::ostream& out, int indent_step, int indent = 0)
+        : out(out)
+        , indent_step(indent_step)
+        , indent(indent) {
+    }
+    RenderContext RenderContext::Indented() const {
+        return { out, indent_step, indent + indent_step };
+    }
+    void RenderContext::RenderIndent() const {
+        for (int i = 0; i < indent; ++i) {
+            out.put(' ');
+        }
+    }
+
+
     namespace {
 
         Node LoadNode(istream& input);

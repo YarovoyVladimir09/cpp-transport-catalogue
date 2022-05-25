@@ -8,5 +8,11 @@
 #include <iostream>
 #include <sstream>
 
-
-void ReadCatalogue(std::istream& input, TransportCatalogue& city);
+class JSONReader {
+public:
+	JSONReader(TransportCatalogue& city_);
+	void ReadCatalogue(std::istream& input);
+	void ParseToCatalogue(json::Document& input);
+private:
+	TransportCatalogue& city;
+};

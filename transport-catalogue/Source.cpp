@@ -160,6 +160,7 @@ int main() {
 
     )"s);
     TransportCatalogue MSK;
-    ReadCatalogue(sss, MSK);
+    JSONReader reader(MSK);
+    reader.ReadCatalogue(sss);
 
 }

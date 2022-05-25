@@ -9,22 +9,10 @@
 namespace json {
 
     struct RenderContext {
-        RenderContext(std::ostream& out)
-            : out(out) {
-        }
-        RenderContext(std::ostream& out, int indent_step, int indent = 0)
-            : out(out)
-            , indent_step(indent_step)
-            , indent(indent) {
-        }
-        RenderContext Indented() const {
-            return { out, indent_step, indent + indent_step };
-        }
-        void RenderIndent() const {
-            for (int i = 0; i < indent; ++i) {
-                out.put(' ');
-            }
-        }
+        RenderContext(std::ostream& out);
+        RenderContext(std::ostream& out, int indent_step, int indent);
+        RenderContext Indented() const;
+        void RenderIndent() const;
         std::ostream& out;
         int indent_step = 0;
         int indent = 0;

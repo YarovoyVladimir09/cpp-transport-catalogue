@@ -13,7 +13,7 @@ svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
     };
 }
 
-void MapRenderObj::EditSvgTextBus(const Point& start,const string& text) {
+void MapRender::EditSvgTextBus(const Point& start,const string& text) {
     bus_texts_.push_back(Text().SetPosition(start).SetOffset(bus_.offset).SetFontSize(bus_.font_size)
         .SetFontFamily("Verdana"s).SetFontWeight("bold"s).SetData(text)
         .SetFillColor(underl_).SetStrokeColor(underl_).SetStrokeWidth(underl_w_)
@@ -23,7 +23,7 @@ void MapRenderObj::EditSvgTextBus(const Point& start,const string& text) {
         .SetFillColor(colors_[color_Num % colors_.size()]));
 }
 
-void MapRenderObj::EditSvgTextStop(const Point& start, const string_view text) {
+void MapRender::EditSvgTextStop(const Point& start, const string_view text) {
     auto under_text = Text().SetPosition(start).SetOffset(stop_.offset).SetFontSize(stop_.font_size)
         .SetFontFamily("Verdana"s).SetData(string(text))
         .SetFillColor(underl_).SetStrokeColor(underl_).SetStrokeWidth(underl_w_)
@@ -36,7 +36,7 @@ void MapRenderObj::EditSvgTextStop(const Point& start, const string_view text) {
     circles_.insert({ text,cir });
 }
 
-void MapRenderObj::BusRender(const Bus* bus) {
+void MapRender::BusRender(const Bus* bus) {
     if (!bus->stops_.empty()) {
 
         Point point;
@@ -61,7 +61,7 @@ void MapRenderObj::BusRender(const Bus* bus) {
     }
 }
 
-void MapRenderObj::SvgRender(ostream& out) {
+void MapRender::SvgRender(ostream& out) {
     Document result;
     for (const auto& poly : polylines_) {
         result.Add((poly));
