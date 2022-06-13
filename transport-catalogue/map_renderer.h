@@ -91,10 +91,7 @@ class MapRender {
 public: 
     MapRender(SphereProjector& proj, double line_w, double rad,
         Label& bus_l, Label& stop_l, svg::Color underlayer, double underlayer_w,
-        std::vector<svg::Color>& colors):
-    proj_(proj),line_w_(line_w), stop_rad_(rad),bus_(bus_l),
-    stop_(stop_l),underl_(underlayer),underl_w_(underlayer_w),colors_(colors) {}
-     
+        std::vector<svg::Color>& colors);     
     void BusRender(const Bus* bus);
     void EditSvgTextBus(const svg::Point& start, const std::string& text);
     void EditSvgTextStop(const svg::Point& start, const std::string_view text);

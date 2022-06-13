@@ -12,6 +12,11 @@ svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
         (max_lat_ - coords.lat) * zoom_coeff_ + padding_
     };
 }
+MapRender::MapRender(SphereProjector& proj, double line_w, double rad,
+    Label& bus_l, Label& stop_l, svg::Color underlayer, double underlayer_w,
+    std::vector<svg::Color>& colors) :
+    proj_(proj), line_w_(line_w), stop_rad_(rad), bus_(bus_l),
+    stop_(stop_l), underl_(underlayer), underl_w_(underlayer_w), colors_(colors) {}
 
 void MapRender::EditSvgTextBus(const Point& start,const string& text) {
     bus_texts_.push_back(Text().SetPosition(start).SetOffset(bus_.offset).SetFontSize(bus_.font_size)

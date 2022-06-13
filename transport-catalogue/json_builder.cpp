@@ -1,7 +1,59 @@
 #include "json_builder.h"
 
 namespace json {
-	Builder::KeyContext Builder::Key(std::string key) {
+
+	Builder::BaseContext::BaseContext(Builder& build) :builder(build) {
+
+	}
+	Builder::KeyContext Builder::BaseContext::Key(std::string key) {
+		builder.Key(key);
+		return builder;
+	}
+	Builder::BaseContext Builder::BaseContext::Value(Node value) {
+		return builder.Value(value);
+
+	}
+	Builder::DictItemContext Builder::BaseContext::StartDict() {
+		builder.StartDict();
+		return builder;
+	}
+	Builder::ArrayItemContext Builder::BaseContext::StartArray() {
+		builder.StartArray();
+		return builder;
+	}
+	Builder::BaseContext Builder::BaseContext::EndDict() {
+		builder.EndDict();
+		return builder;
+	}
+	Builder::BaseContext Builder::BaseContext::EndArray() {
+		builder.EndArray();
+		return builder;
+	}
+	Node Builder::BaseContext::Build() {
+		return builder.Build();
+	}
+
+	Builder::DictItemContext::DictItemContext(Builder& build) :BaseContext(build) {
+
+	}
+	Builder::KeyContext::KeyContext(Builder& build) :BaseContext(build) {
+
+	}
+	Builder::ValueDictContext Builder::KeyContext::Value(Node value) {
+		builder.Value(value);
+		return builder;
+	}
+	Builder::ArrayItemContext::ArrayItemContext(Builder& build) :BaseContext(build) {
+
+	}
+	Builder::ArrayItemContext Builder::ArrayItemContext::Value(Node value) {
+		builder.Value(value);
+		return builder;
+	}			
+	Builder::ValueDictContext::ValueDictContext(Builder& build) :BaseContext(build) {
+
+	}
+	const Builder::KeyContext Builder::Key(std::string key) {
 		ready == true ? (throw  std::logic_error("Key")) : 0;
 		if (root_->IsDict() && key_buffer.empty()) {
 			key_buffer = key;

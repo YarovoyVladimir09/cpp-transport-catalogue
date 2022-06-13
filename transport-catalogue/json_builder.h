@@ -16,7 +16,7 @@ namespace json {
 		class ValueDictContext;
 
 		Builder() = default;
-		KeyContext Key(std::string key);
+		const KeyContext Key(std::string key);
 		BaseContext Value(Node value);
 		DictItemContext StartDict();
 		ArrayItemContext StartArray();
@@ -35,47 +35,21 @@ namespace json {
 		class BaseContext
 		{
 		public:
-			BaseContext(Builder& build) :builder(build) {
-
-			}
-			KeyContext Key(std::string key) {
-				builder.Key(key);
-				return builder;
-			}
-			BaseContext Value(Node value) {
-				return builder.Value(value);
-				
-			}
-			DictItemContext StartDict() {
-				builder.StartDict();
-				return builder;
-			}
-			ArrayItemContext StartArray() {
-				builder.StartArray();
-				return builder;
-			}
-			BaseContext EndDict() {
-				builder.EndDict();
-				return builder;
-			}
-			BaseContext EndArray() {
-				builder.EndArray();
-				return builder;
-			}
-			Node Build() {
-				return builder.Build();
-			}
-
-
+			BaseContext(Builder& build);
+			KeyContext Key(std::string key);
+			BaseContext Value(Node value);
+			DictItemContext StartDict();
+			ArrayItemContext StartArray();
+			BaseContext EndDict();
+			BaseContext EndArray();
+			Node Build();
 			Builder& builder;
 		};
 
 		class DictItemContext :public BaseContext
 		{
 		public:
-			DictItemContext(Builder& build) :BaseContext(build) {
-
-			}
+			DictItemContext(Builder& build);
 			DictItemContext& Value(Node value) = delete;
 			DictItemContext& StartDict() = delete;
 			DictItemContext& StartArray() = delete;
@@ -86,13 +60,8 @@ namespace json {
 		class KeyContext :public BaseContext
 		{
 		public:
-			KeyContext(Builder& build) :BaseContext(build) {
-
-			}
-			ValueDictContext Value(Node value) {
-				builder.Value(value);
-				return builder;
-			}
+			KeyContext(Builder& build);
+			ValueDictContext Value(Node value);
 			Builder& Key(std::string key) = delete;
 			KeyContext& EndDict() = delete;
 			KeyContext& EndArray() = delete;
@@ -102,13 +71,8 @@ namespace json {
 		class ArrayItemContext :public BaseContext
 		{
 		public:
-			ArrayItemContext(Builder& build) :BaseContext(build) {
-
-			}
-			ArrayItemContext Value(Node value) {
-				builder.Value(value);
-				return builder;
-			}
+			ArrayItemContext(Builder& build);
+			ArrayItemContext Value(Node value);
 			Builder& Key(std::string key) = delete;
 			KeyContext& EndDict() = delete;
 			Node Build() = delete;
@@ -117,9 +81,7 @@ namespace json {
 		class ValueDictContext :public BaseContext
 		{
 		public:
-			ValueDictContext(Builder& build) :BaseContext(build) {
-
-			}
+			ValueDictContext(Builder& build);
 			Node Build() = delete;
 			Builder& Value(Node value) = delete;
 			DictItemContext StartDict() = delete;

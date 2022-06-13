@@ -84,6 +84,6 @@ int main() {
     fstream s("s10_final_opentest_3.json");
     TransportCatalogue MSK;
     JSONReader reader(MSK);
-    reader.ReadCatalogue(std::cin);
+    reader.ReadCatalogue(sss);
 
 }
