@@ -2,7 +2,8 @@
 
 using namespace std;
 
-JSONReader::JSONReader(TransportCatalogue& city_):city(city_){}
+JSONReader::JSONReader(TransportCatalogue& city_):city(city_){
+}
 
 void JSONReader::ReadCatalogue(std::istream& input) {
 	json::Document catalogue_data = json::Load(input);

@@ -11,12 +11,13 @@ struct Stop {
 };
 
 struct Bus {
-	Bus(std::string name, std::vector<Stop*> stop, double length_, double curve_, bool roundtrip_);
+	Bus(std::string name, std::vector<Stop*> stop, double length_, double curve_, bool roundtrip_, bool empty_);
 	std::string name_;
 	std::vector<Stop*> stops_;
 	double length;
 	double curve;
 	bool roundtrip;
+	bool empty;
 };
 
 struct BusInfo {

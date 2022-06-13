@@ -4,6 +4,9 @@ using namespace std;
 using namespace json;
 
 string_view Trim(string_view word_to_clear) {
+	if (word_to_clear.empty()) {
+		return word_to_clear;
+	}
 	size_t start = word_to_clear.find_first_not_of(" ");
 	size_t end = word_to_clear.find_last_not_of(" ");
 	return word_to_clear.substr(start, end - start + 1);
@@ -28,13 +31,13 @@ void RequestHandler::AddDistanceBetweenStop(const json::Dict& inf, const string&
 void RequestHandler::TransportBase(json::Document& input) {
 	vector<tuple<string, vector<string>, bool>> buses;
 	vector<tuple<string, string, double>> stops_info;
-	const auto& req_info = input.GetRoot().AsMap();
+	const auto& req_info = input.GetRoot().AsDict();
 	for (const auto& base_ : req_info.at("base_requests"s).AsArray()) {
-		const auto& trans_inf = base_.AsMap();
+		const auto& trans_inf = base_.AsDict();
 		if (trans_inf.at("type"s).AsString() == "Stop"s) {
 			AddStopFromHandler(trans_inf);
 			if (trans_inf.count("road_distances"s)) {
-				AddDistanceBetweenStop(trans_inf.at("road_distances"s).AsMap(),
+				AddDistanceBetweenStop(trans_inf.at("road_distances"s).AsDict(),
 					string(Trim(trans_inf.at("name"s).AsString())),
 					stops_info);
 			}
@@ -60,25 +63,42 @@ void RequestHandler::TransportBase(json::Document& input) {
 Dict RequestHandler::BusOut(const json::Dict& input) {
 	const string& name = string(Trim(input.at("name"s).AsString()));
 	if (!city.BusCount(name)) {
-		return Dict{ {"request_id"s,input.at("id"s).AsInt()},{"error_message"s, "not found"s} };
+		//return Dict{ {"request_id"s,input.at("id"s).AsInt()},{"error_message"s, "not found"s} };
+		return json::Builder{}.StartDict().
+			Key("request_id"s).Value(input.at("id"s).AsInt()).
+			Key("error_message"s).Value("not found"s).
+			EndDict().Build().AsDict();
+	}
+	else if (city.GetBusEmptyInfo(name)) {
+		return json::Builder{}.StartDict().EndDict().Build().AsDict();
 	}
 	else {
 		auto [stops, uniq, length, curve] = city.GetBusInfo(name);
-		return Dict{
-			{"curvature"s,curve},
-			{"request_id"s,input.at("id").AsInt()},
-			{"route_length"s, length},
-			{"stop_count"s,stops},
-			{"unique_stop_count"s, uniq}
-		};
+		//return Dict{
+		//	{"curvature"s,curve},
+		//	{"request_id"s,input.at("id").AsInt()},
+		//	{"route_length"s, length},
+		//	{"stop_count"s,stops},
+		//	{"unique_stop_count"s, uniq}
+		//};
+		return json::Builder{}.StartDict().Key("curvature"s).Value(curve).
+			Key("request_id"s).Value(input.at("id"s).AsInt()).
+			Key("route_length"s).Value(length).
+			Key("stop_count"s).Value(stops).
+			Key("unique_stop_count"s).Value(uniq).
+			EndDict().Build().AsDict();
 	}
 }
 
 Dict RequestHandler::StopOut(const json::Dict& input) {
 	const string& name = string(Trim(input.at("name").AsString()));
 	if (!city.StopCount(name)) {
-		return Dict{ {"request_id"s,input.at("id").AsInt()},
-			{"error_message"s, "not found"s} };
+		//return Dict{ {"request_id"s,input.at("id").AsInt()},
+		//	{"error_message"s, "not found"s} };
+		return json::Builder{}.StartDict().
+			Key("request_id"s).Value(input.at("id"s).AsInt()).
+			Key("error_message"s).Value("not found"s).
+			EndDict().Build().AsDict();
 
 	}
 	else {
@@ -86,22 +106,30 @@ Dict RequestHandler::StopOut(const json::Dict& input) {
 		for (auto bus : city.GetStopInfo(name)) {
 			list_of_bus.push_back(string(bus));
 		}
-		return Dict{ {"buses"s,Array(list_of_bus.begin(),list_of_bus.end())},
-				{"request_id"s, input.at("id"s).AsInt()} };
+		//return Dict{ {"buses"s,Array(list_of_bus.begin(),list_of_bus.end())},
+		//		{"request_id"s, input.at("id"s).AsInt()} };
+		return json::Builder{}.StartDict().
+			Key("buses"s).Value(Array(list_of_bus.begin(), list_of_bus.end())).
+			Key("request_id"s).Value(input.at("id"s).AsInt()).
+			EndDict().Build().AsDict();
 	}
 }
 
 Dict RequestHandler::MapOut(const json::Dict& input, ostringstream& stream) {
-	return Dict{ {"map"s,stream.str()},
-		{"request_id"s, input.at("id"s).AsInt()} };
+	//return Dict{ {"map"s,stream.str()},
+	//	{"request_id"s, input.at("id"s).AsInt()} };
+	return json::Builder{}.StartDict().
+		Key("map"s).Value(stream.str()).
+		Key("request_id"s).Value(input.at("id"s).AsInt()).
+		EndDict().Build().AsDict();
 }
 
 void RequestHandler::TransportStat(json::Document& input) {
-	const auto& req_info = input.GetRoot().AsMap();
+	const auto& req_info = input.GetRoot().AsDict();
 	Array result;
-	auto context = RenderContext(cout, 2, 0);
+	//auto context = RenderContext(cout, 2, 0);
 	for (const auto& base_ : req_info.at("stat_requests"s).AsArray()) {
-		const auto& trans_inf = base_.AsMap();
+		const auto& trans_inf = base_.AsDict();
 		if (trans_inf.at("type"s).AsString() == "Stop"s) {
 
 			result.emplace_back(StopOut(trans_inf));
@@ -118,7 +146,7 @@ void RequestHandler::TransportStat(json::Document& input) {
 			result.emplace_back(MapOut(trans_inf, svg_res));
 		}
 	}
-	PrintNode(result, context);
+	Print(Document(result), cout);
 }
 
 svg::Color ToColor(const json::Node& node) {
@@ -143,8 +171,8 @@ svg::Color ToColor(const json::Node& node) {
 }
 
 void RequestHandler::RenderSettings(json::Document& input, ostream& out) {
-	const auto& req_info = input.GetRoot().AsMap();
-	const auto& render_inf = req_info.at("render_settings"s).AsMap();
+	const auto& req_info = input.GetRoot().AsDict();
+	const auto& render_inf = req_info.at("render_settings"s).AsDict();
 	const auto& stops = city.GetAllStopWithBus();
 	vector<geo::Coordinates>coordinates;
 	for (const auto& stop : stops) {

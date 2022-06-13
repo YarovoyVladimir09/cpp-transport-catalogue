@@ -7,8 +7,8 @@ Stop::Stop(std::string name, double x, double y) :name_(name) {
 	coordinate.lng = y;
 }
 
-Bus::Bus(std::string name, std::vector<Stop*> stop, double length_, double curve_, bool roundtrip_)
-	:name_(name), length(length_), curve(curve_), roundtrip(roundtrip_) {
+Bus::Bus(std::string name, std::vector<Stop*> stop, double length_, double curve_, bool roundtrip_, bool empty_)
+	:name_(name), length(length_), curve(curve_), roundtrip(roundtrip_), empty(empty_) {
 	stops_.insert(stops_.begin(), make_move_iterator(stop.begin()), make_move_iterator(stop.end()));
 }
 

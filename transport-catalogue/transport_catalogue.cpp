@@ -24,8 +24,12 @@ void TransportCatalogue::AddBus(string bus_name, vector<string> stop_rout, bool 
 	vector<Stop*> stops_on_rout;
 	double length = 0;
 	double real_length = 0;
+	bool empty = false;
 	for (auto stop = stop_rout.begin(); stop != stop_rout.end(); ++stop) {
-		stops_on_rout.push_back(stopname_to_stop_.at(* stop));
+		if (stopname_to_stop_.count(*stop) == 0 || (stopname_to_stop_.at(*stop)->coordinate.lat==0.0&& stopname_to_stop_.at(*stop)->coordinate.lng == 0.0)) {
+			empty = true;
+		}
+		stops_on_rout.push_back(stopname_to_stop_.at(*stop));
 		if (stop + 1 != stop_rout.end()) {
 			stop_distance_[{stopname_to_stop_.at(*stop), stopname_to_stop_.at(*(stop + 1))}] =
 				ComputeDistance(stopname_to_stop_.at(*stop)->coordinate,
@@ -34,7 +38,7 @@ void TransportCatalogue::AddBus(string bus_name, vector<string> stop_rout, bool 
 			real_length += GetRealLength(stopname_to_stop_[*stop], stopname_to_stop_[*(stop + 1)]);
 		}
 	}
-	auto it = &buses_.emplace_front(Bus(move(bus_name), stops_on_rout, real_length, real_length / length, routingtype));
+	auto it = &buses_.emplace_front(Bus(move(bus_name), stops_on_rout, real_length, real_length / length, routingtype, empty));
 	busname_to_bus_[it->name_] = it;
 	for (auto& stopp : it->stops_) {
 		bus_on_stop_[stopp->name_].insert(it->name_);
@@ -42,6 +46,9 @@ void TransportCatalogue::AddBus(string bus_name, vector<string> stop_rout, bool 
 }
 
 void TransportCatalogue::AddRealDistance(string_view stop1, string_view stop2, double dist) {
+	if (stopname_to_stop_.count(stop2) == 0) {
+		AddStop(string(stop2),0,0);
+	}
 	real_stop_distance_[{stopname_to_stop_[stop1], stopname_to_stop_[(stop2)]}] = dist;
 }
 
@@ -58,6 +65,11 @@ BusInfo TransportCatalogue::GetBusInfo(string_view bus_name) {
 
 	return { BusInfo(size_of_route,size_of_unique_stops,busname_to_bus_.at(bus_name)->length,
 		busname_to_bus_.at(bus_name)->curve) };
+}
+
+bool TransportCatalogue::GetBusEmptyInfo(string_view bus_name) {
+
+	return busname_to_bus_.at(bus_name)->empty;
 }
 
 bool TransportCatalogue::StopCount(string_view stop_name) const {

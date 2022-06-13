@@ -23,7 +23,9 @@ public:
 	bool StopCount(std::string_view stop_name) const;
 
 	BusInfo GetBusInfo(std::string_view bus_name);
+	bool GetBusEmptyInfo(std::string_view stop_name);
 	std::set<std::string_view>& GetStopInfo(std::string_view stop_name);
+
 	double GetLength(Stop* stop1, Stop* stop2);
 	double GetRealLength(Stop* stop1, Stop* stop2);
 	const std::map<std::string_view, Bus*>& GetAllBus() const;
