@@ -1,4 +1,5 @@
 #include "request_handler.h"
+#include <fstream>
 
 using namespace std;
 using namespace json;
@@ -74,13 +75,6 @@ Dict RequestHandler::BusOut(const json::Dict& input) {
 	}
 	else {
 		auto [stops, uniq, length, curve] = city.GetBusInfo(name);
-		//return Dict{
-		//	{"curvature"s,curve},
-		//	{"request_id"s,input.at("id").AsInt()},
-		//	{"route_length"s, length},
-		//	{"stop_count"s,stops},
-		//	{"unique_stop_count"s, uniq}
-		//};
 		return json::Builder{}.StartDict().Key("curvature"s).Value(curve).
 			Key("request_id"s).Value(input.at("id"s).AsInt()).
 			Key("route_length"s).Value(length).
@@ -115,9 +109,44 @@ Dict RequestHandler::StopOut(const json::Dict& input) {
 	}
 }
 
+json::Dict RequestHandler::RouteOut(const Dict &input, const TransportRouter& router, graph::Router<double>& transport_router) {
+    const string& from = string(Trim(input.at("from").AsString()));
+    const string& to = string(Trim(input.at("to").AsString()));
+    auto from_vertex = router.GetStopVertex(from);
+    auto to_vertex = router.GetStopVertex(to);
+    if(from_vertex == nullopt || to_vertex == nullopt){
+		return json::Builder{}.StartDict().
+			Key("request_id"s).Value(input.at("id"s).AsInt()).
+			Key("error_message"s).Value("not found"s).EndDict().
+			Build().AsDict();
+    }
+
+    auto result = transport_router.BuildRoute(*from_vertex, *to_vertex);
+    if(result == nullopt ){
+        return json::Builder{}.StartDict().
+                Key("request_id"s).Value(input.at("id"s).AsInt()).
+                Key("error_message"s).Value("not found"s).EndDict().
+                Build().AsDict();
+    }
+    vector<json::Node> nodes;
+    for(auto& edge : result->edges ){
+        //if(&edge == &result->edges.back()) continue;
+        graph::Edge<double> answer = router.GetGraph().GetEdge(edge);
+        if (answer.edge_status == graph::RouteInfo::Wait) {
+            nodes.emplace_back(Builder{}.StartDict().Key("stop_name"s).Value(router.GetVertexName(answer.to)).
+                    Key("time"s).Value(answer.weight).Key("type"s).Value("Wait"s).EndDict().Build());
+        }else{
+            nodes.emplace_back(Builder{}.StartDict().Key("bus"s).Value(string(answer.ride_info.bus)).
+                    Key("span_count"s).Value(answer.ride_info.span_count). Key("time"s).Value(answer.weight).
+                    Key("type"s).Value("Bus"s).EndDict().Build());
+        }
+    }
+    return json::Builder{}.StartDict().
+            Key("items"s).Value(Array(nodes.begin(), nodes.end())).Key("request_id"s).Value(input.at("id"s).AsInt()).
+            Key("total_time").Value(result->weight).EndDict().Build().AsDict();
+}
+
 Dict RequestHandler::MapOut(const json::Dict& input, ostringstream& stream) {
-	//return Dict{ {"map"s,stream.str()},
-	//	{"request_id"s, input.at("id"s).AsInt()} };
 	return json::Builder{}.StartDict().
 		Key("map"s).Value(stream.str()).
 		Key("request_id"s).Value(input.at("id"s).AsInt()).
@@ -125,28 +154,30 @@ Dict RequestHandler::MapOut(const json::Dict& input, ostringstream& stream) {
 }
 
 void RequestHandler::TransportStat(json::Document& input) {
+	ofstream output("output.json", ios_base::out);
+	//output.open("output.json", ios_base::out);
+    TransportRouter router = TransportRouter(city);
 	const auto& req_info = input.GetRoot().AsDict();
+    graph::Router<double> transport_router(router.GetGraph());
 	Array result;
-	//auto context = RenderContext(cout, 2, 0);
 	for (const auto& base_ : req_info.at("stat_requests"s).AsArray()) {
 		const auto& trans_inf = base_.AsDict();
 		if (trans_inf.at("type"s).AsString() == "Stop"s) {
-
 			result.emplace_back(StopOut(trans_inf));
-
 		}
 		else if (trans_inf.at("type"s).AsString() == "Bus"s) {
-
 			result.emplace_back(BusOut(trans_inf));
-
 		}
+        else if(trans_inf.at("type"s).AsString() == "Route"s){
+            result.emplace_back(RouteOut(trans_inf, router, transport_router));
+        }
 		else if (trans_inf.at("type"s).AsString() == "Map"s) {
 			ostringstream svg_res;
 			RenderSettings(input,  svg_res);
 			result.emplace_back(MapOut(trans_inf, svg_res));
 		}
 	}
-	Print(Document(result), cout);
+	Print(Document(result), output);
 }
 
 svg::Color ToColor(const json::Node& node) {
@@ -209,3 +240,19 @@ render_inf.at("stop_label_offset"s).AsArray()[1].AsDouble()
 	map_obj.SvgRender(out);
 
 }
+
+void RequestHandler::TransportRouteSettings(Document &input) {
+    vector<tuple<string, vector<string>, bool>> buses;
+    vector<tuple<string, string, double>> stops_info;
+    const auto& req_info = input.GetRoot().AsDict();
+    for (const auto& base_ : req_info.at("routing_settings"s).AsDict()) {
+        if(base_.first == "bus_wait_time"s){
+            city.SetWaitTime(base_.second.AsInt());
+        }else if (base_.first == "bus_velocity"s){
+            city.SetBusVelocity(base_.second.AsDouble());
+        }
+    }
+
+}
+
+

@@ -2,6 +2,7 @@
 #include "transport_catalogue.h"
 #include "json_builder.h"
 #include "map_renderer.h"
+#include "transport_router.h"
 
 #include <string>
 #include <iostream>
@@ -18,8 +19,10 @@ public:
 
     json::Dict BusOut(const json::Dict& input);
     json::Dict StopOut(const json::Dict& input);
+    json::Dict RouteOut(const json::Dict& input, const TransportRouter& router, graph::Router<double>& route);
     json::Dict MapOut(const json::Dict& input, std::ostringstream& stream);
     void TransportStat(json::Document& input);
+    void TransportRouteSettings(json::Document& input);
     void RenderSettings(json::Document& input, std::ostream& out);
 
 private:

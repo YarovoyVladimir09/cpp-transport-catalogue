@@ -13,5 +13,6 @@ void JSONReader::ReadCatalogue(std::istream& input) {
 void JSONReader::ParseToCatalogue(json::Document& input) {
 	RequestHandler handler(city);
 	handler.TransportBase(input);
+    handler.TransportRouteSettings(input);
 	handler.TransportStat(input);
 }

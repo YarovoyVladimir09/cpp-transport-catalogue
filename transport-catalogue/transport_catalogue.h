@@ -30,6 +30,13 @@ public:
 	double GetRealLength(Stop* stop1, Stop* stop2);
 	const std::map<std::string_view, Bus*>& GetAllBus() const;
 	const std::unordered_set<Stop*> GetAllStopWithBus() const;
+    size_t GetStopNumber() const;
+
+    void SetWaitTime(int);
+    void SetBusVelocity(double );
+    int GetWaitTime() const;
+    double GetBusVelocity() const;
+    int total_stops = 0;
 
 
 private:
@@ -41,5 +48,8 @@ private:
 	std::unordered_map<std::pair<Stop*, Stop*>, double, StopPairHash> stop_distance_;
 	std::unordered_map<std::pair<Stop*, Stop*>, double, StopPairHash> real_stop_distance_;
 	std::unordered_map<std::string_view, std::set<std::string_view>> bus_on_stop_;
+    double bus_wait_time = 0;
+    double bus_velocity = 0;
+
 
 };

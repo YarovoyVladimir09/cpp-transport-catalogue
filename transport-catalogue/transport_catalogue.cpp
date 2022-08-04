@@ -26,7 +26,8 @@ void TransportCatalogue::AddBus(string bus_name, vector<string> stop_rout, bool 
 	double real_length = 0;
 	bool empty = false;
 	for (auto stop = stop_rout.begin(); stop != stop_rout.end(); ++stop) {
-		if (stopname_to_stop_.count(*stop) == 0 || (stopname_to_stop_.at(*stop)->coordinate.lat==0.0&& stopname_to_stop_.at(*stop)->coordinate.lng == 0.0)) {
+		if (stopname_to_stop_.count(*stop) == 0 ||
+        (stopname_to_stop_.at(*stop)->coordinate.lat==0.0&& stopname_to_stop_.at(*stop)->coordinate.lng == 0.0)) {
 			empty = true;
 		}
 		stops_on_rout.push_back(stopname_to_stop_.at(*stop));
@@ -38,11 +39,14 @@ void TransportCatalogue::AddBus(string bus_name, vector<string> stop_rout, bool 
 			real_length += GetRealLength(stopname_to_stop_[*stop], stopname_to_stop_[*(stop + 1)]);
 		}
 	}
-	auto it = &buses_.emplace_front(Bus(move(bus_name), stops_on_rout, real_length, real_length / length, routingtype, empty));
+	auto it = &buses_.emplace_front(Bus(move(bus_name), stops_on_rout,
+                                        real_length, real_length / length,
+                                        routingtype, empty));
 	busname_to_bus_[it->name_] = it;
 	for (auto& stopp : it->stops_) {
 		bus_on_stop_[stopp->name_].insert(it->name_);
 	}
+    total_stops+=stops_on_rout.size();
 }
 
 void TransportCatalogue::AddRealDistance(string_view stop1, string_view stop2, double dist) {
@@ -107,4 +111,24 @@ const std::unordered_set<Stop*> TransportCatalogue::GetAllStopWithBus() const {
 		}
 	}
 	return result;
+}
+
+void TransportCatalogue::SetWaitTime(int time) {
+    bus_wait_time = time;
+}
+
+void TransportCatalogue::SetBusVelocity(double velocity) {
+    bus_velocity = velocity;
+}
+
+int TransportCatalogue::GetWaitTime() const {
+    return bus_wait_time;
+}
+
+double TransportCatalogue::GetBusVelocity() const {
+    return bus_velocity;
+}
+
+size_t TransportCatalogue::GetStopNumber() const{
+    return stopname_to_stop_.size();
 }
