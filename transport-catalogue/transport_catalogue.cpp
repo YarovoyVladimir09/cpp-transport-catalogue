@@ -103,6 +103,11 @@ const std::map<std::string_view, Bus*>& TransportCatalogue::GetAllBus() const{
 	return busname_to_bus_;
 }
 
+const std::unordered_map<std::string_view, Stop *> &TransportCatalogue::GetAllStop() const {
+    return stopname_to_stop_;
+}
+
+
 const std::unordered_set<Stop*> TransportCatalogue::GetAllStopWithBus() const {
 	unordered_set<Stop*> result;
 	for (const auto& stop : bus_on_stop_) {
@@ -132,3 +137,9 @@ double TransportCatalogue::GetBusVelocity() const {
 size_t TransportCatalogue::GetStopNumber() const{
     return stopname_to_stop_.size();
 }
+
+const std::unordered_map<std::pair<Stop *, Stop *>, double, StopPairHash> &
+TransportCatalogue::GetAllRealDistances() const {
+    return real_stop_distance_;
+}
+

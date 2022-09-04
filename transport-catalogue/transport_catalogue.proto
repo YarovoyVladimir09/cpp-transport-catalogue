@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+import "map_renderer.proto";
+import "transport_router.proto";
+
+package TransportData;
+
+message Stop {
+    string name = 1;
+    double latit = 2;
+    double longit = 3;
+}
+
+message StopDistance {
+    string first_stop = 1;
+    string second_stop = 2;
+    double dist = 3;
+}
+
+
+message Bus {
+    string name = 1;
+    repeated string stops = 2;
+    bool routingtype = 3;
+}
+
+message TransportCatalogue {
+    repeated Stop stops = 1;
+    repeated Bus buses = 2;
+    repeated StopDistance distances = 3;
+    MapData.MapRender map_obj = 4;
+    RouterData.TransportRouter transport_router_ = 5;
+    double bus_wait_time = 6;
+    double bus_velocity = 7;
+}

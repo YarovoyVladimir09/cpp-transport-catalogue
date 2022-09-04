@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package MapData;
+
+import "svg.proto";
+
+message SphereProjector {
+  double padding_ = 1;
+  double min_lon_ = 2;
+  double max_lat_ = 3;
+  double zoom_coeff_ = 4;
+}
+
+message MapRender {
+  SphereProjector projector = 1;
+  SVG svg_setting = 2;
+}

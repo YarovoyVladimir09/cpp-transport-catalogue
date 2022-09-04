@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package MapData;
+
+message Label{
+  int32 font_size = 1;
+  double x = 2;
+  double y = 3;
+}
+
+message Color{
+  string color_info = 1;
+}
+
+message SVG{
+  double line_w_ = 1;
+  double stop_rad_ = 2;
+  Label bus_ = 3;
+  Label stop_ = 4;
+  Color underl_ = 5;
+  double  underl_w_ = 6;
+  repeated Color colors_ = 7;
+
+}

@@ -5,14 +5,16 @@
 #include <cstdlib>
 #include <vector>
 
+//class TransportSerialization;
+
 namespace graph {
 
 using VertexId = size_t;
 using EdgeId = size_t;
 
 enum class RouteInfo{
-    Wait,
-    Ride
+    Wait = 0,
+    Ride = 1
 };
 
 struct RideInfo{
@@ -36,6 +38,8 @@ struct Edge {
 
 };
 
+
+
 template <typename Weight>
 class DirectedWeightedGraph {
 private:
@@ -43,14 +47,17 @@ private:
     using IncidentEdgesRange = ranges::Range<typename IncidenceList::const_iterator>;
 
 public:
+    //friend class TransportSerialization;
     DirectedWeightedGraph() = default;
     explicit DirectedWeightedGraph(size_t vertex_count);
     EdgeId AddEdge(const Edge<Weight>& edge);
 
     size_t GetVertexCount() const;
     size_t GetEdgeCount() const;
-    const Edge<Weight>& GetEdge(EdgeId edge_id) const;
+    Edge<Weight>& GetEdge(EdgeId edge_id);
     IncidentEdgesRange GetIncidentEdges(VertexId vertex) const;
+    const std::vector<Edge<Weight>>& GetAllEdges() const;
+    const std::vector<std::vector<EdgeId>>& GetIncidenceLists() const;
 
 private:
     std::vector<Edge<Weight>> edges_;
@@ -81,7 +88,7 @@ size_t DirectedWeightedGraph<Weight>::GetEdgeCount() const {
 }
 
 template <typename Weight>
-const Edge<Weight>& DirectedWeightedGraph<Weight>::GetEdge(EdgeId edge_id) const {
+ Edge<Weight>& DirectedWeightedGraph<Weight>::GetEdge(EdgeId edge_id)  {
     return edges_.at(edge_id);
 }
 
@@ -90,4 +97,14 @@ typename DirectedWeightedGraph<Weight>::IncidentEdgesRange
 DirectedWeightedGraph<Weight>::GetIncidentEdges(VertexId vertex) const {
     return ranges::AsRange(incidence_lists_.at(vertex));
 }
+
+    template<typename Weight>
+    const std::vector<std::vector<EdgeId>> &DirectedWeightedGraph<Weight>::GetIncidenceLists() const {
+        return incidence_lists_;
+    }
+
+    template<typename Weight>
+    const std::vector<Edge<Weight>> &DirectedWeightedGraph<Weight>::GetAllEdges() const {
+        return edges_;
+    }
 }  // namespace graph

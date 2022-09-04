@@ -29,6 +29,8 @@ public:
 	double GetLength(Stop* stop1, Stop* stop2);
 	double GetRealLength(Stop* stop1, Stop* stop2);
 	const std::map<std::string_view, Bus*>& GetAllBus() const;
+    const std::unordered_map<std::string_view, Stop*> & GetAllStop() const;
+    const std::unordered_map<std::pair<Stop*, Stop*>, double, StopPairHash>& GetAllRealDistances() const;
 	const std::unordered_set<Stop*> GetAllStopWithBus() const;
     size_t GetStopNumber() const;
 
@@ -42,9 +44,10 @@ public:
 private:
 	std::deque<Stop> stops_;
 	std::unordered_map<std::string_view, Stop*> stopname_to_stop_;
+
 	std::deque<Bus> buses_;
-	//std::unordered_map<std::string_view, Bus*> busname_to_bus_;
 	std::map<std::string_view, Bus*> busname_to_bus_;
+
 	std::unordered_map<std::pair<Stop*, Stop*>, double, StopPairHash> stop_distance_;
 	std::unordered_map<std::pair<Stop*, Stop*>, double, StopPairHash> real_stop_distance_;
 	std::unordered_map<std::string_view, std::set<std::string_view>> bus_on_stop_;

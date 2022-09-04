@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package GraphData;
+
+message RideInfo{
+  string bus = 1;
+  int32 span_count = 2;
+}
+
+message WaitInfo{
+    string stop = 1;
+}
+
+enum RouteInfo{
+  Wait = 0;
+  Ride = 1;
+}
+
+message Edge{
+  uint32 from = 1;
+  uint32 to = 2;
+  double weight = 3;
+  RouteInfo edge_status = 4;
+  RideInfo ride_info = 5;
+  WaitInfo  wait_info = 6;
+}

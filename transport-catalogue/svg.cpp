@@ -12,6 +12,11 @@ namespace svg {
         return out;
     }
 
+    void SerPrintColor(ostream &out, Color color) {
+        std::visit(SerializationColorPrinter{ out }, color);
+    }
+
+
     std::ostream& operator<<(std::ostream& out, const StrokeLineCap& en) {
         switch (en)
         {
@@ -49,10 +54,12 @@ namespace svg {
         }
         return out;
     }
+
+
     void Object::Render(const RenderContext& context) const {
         context.RenderIndent();
 
-        // Делегируем вывод тега своим подклассам
+        // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
         RenderObject(context);
 
         context.out << std::endl;
@@ -117,31 +124,31 @@ namespace svg {
         return *this;
     }
 
-    // Задаёт смещение относительно опорной точки (атрибуты dx, dy)
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ dx, dy)
     Text& Text::SetOffset(Point offset) {
         offset_ = offset;
         return *this;
     }
 
-    // Задаёт размеры шрифта (атрибут font-size)
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ font-size)
     Text& Text::SetFontSize(uint32_t size) {
         font_size_ = size;
         return *this;
     }
 
-    // Задаёт название шрифта (атрибут font-family)
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ font-family)
     Text& Text::SetFontFamily(std::string font_family) {
         font_family_ = font_family;
         return *this;
     }
 
-    // Задаёт толщину шрифта (атрибут font-weight)
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅ font-weight)
     Text& Text::SetFontWeight(std::string font_weight) {
         font_weight_ = font_weight;
         return *this;
     }
 
-    // Задаёт текстовое содержимое объекта (отображается внутри тега text)
+    // пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ text)
     Text& Text::SetData(std::string data) {
         data_ = data;
         return *this;

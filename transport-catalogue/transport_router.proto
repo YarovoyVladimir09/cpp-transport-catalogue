@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+import "graph.proto";
+
+package RouterData;
+
+message IncidenceList{
+  repeated uint32 EdgeIds = 1;
+}
+
+message DirectedWeightedGraph{
+  repeated GraphData.Edge edges_ = 1;
+  repeated IncidenceList incidence_lists_ = 2;
+}
+
+message Vertexes {
+  repeated int32 vertexes = 1;
+}
+
+message InternalData{
+  double weight = 1;
+  bool isWeigth = 2;
+  int32 prev_edge = 3;
+  bool isEdge = 4;
+}
+
+message RouteInternalData{
+   repeated InternalData data = 1;
+}
+
+message Router{
+  repeated RouteInternalData routes_internal_data_ = 1;
+}
+
+message TransportRouter{
+  map<string, Vertexes> station_and_graphposition = 1;
+  map<int32, string> vertex_name = 2;
+  DirectedWeightedGraph route_graph = 3;
+  double bus_wait_time = 4;
+  double bus_velocity = 5;
+  uint32 vertex_count = 6;
+  Router router_ = 7;
+}

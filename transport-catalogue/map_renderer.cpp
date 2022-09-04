@@ -12,10 +12,33 @@ svg::Point SphereProjector::operator()(geo::Coordinates coords) const {
         (max_lat_ - coords.lat) * zoom_coeff_ + padding_
     };
 }
+
+SphereProjector::SphereProjector(double padding, double min_lon, double max_lat, double zoom_coeff):padding_(padding),
+min_lon_(min_lon), max_lat_(max_lat), zoom_coeff_(zoom_coeff){
+}
+
+//std::tuple<double, double, double, double> SphereProjector::GetInfo() const {
+//    return {padding_,min_lon_, max_lat_, zoom_coeff_};
+//}
+
+void SphereProjector::operator=(SphereProjector &&other) {
+    padding_= move(other.padding_);
+    min_lon_= move(other.min_lon_);
+    max_lat_ = move(other.max_lat_);
+    zoom_coeff_= move(other.zoom_coeff_);
+}
+
+SphereProjector::SphereProjector(SphereProjector&& other) noexcept {
+    padding_= move(other.padding_);
+    min_lon_= move(other.min_lon_);
+    max_lat_ = move(other.max_lat_);
+    zoom_coeff_= move(other.zoom_coeff_);
+}
+
 MapRender::MapRender(SphereProjector& proj, double line_w, double rad,
     Label& bus_l, Label& stop_l, svg::Color underlayer, double underlayer_w,
     std::vector<svg::Color>& colors) :
-    proj_(proj), line_w_(line_w), stop_rad_(rad), bus_(bus_l),
+    proj_(move(proj)), line_w_(line_w), stop_rad_(rad), bus_(bus_l),
     stop_(stop_l), underl_(underlayer), underl_w_(underlayer_w), colors_(colors) {}
 
 void MapRender::EditSvgTextBus(const Point& start,const string& text) {
@@ -83,3 +106,15 @@ void MapRender::SvgRender(ostream& out) {
     }
     result.Render(out);
 }
+
+void MapRender::operator=(MapRender &&other) {
+proj_ = move(other.proj_);
+line_w_ = move(other.line_w_);
+stop_rad_= move(other.stop_rad_);
+bus_ = move(other.bus_);
+stop_ = move(other.stop_);
+underl_ = move(other.underl_);
+underl_w_ = move(other.underl_w_);
+colors_ = move(other.colors_);
+}
+

@@ -13,7 +13,7 @@ string_view Trim(string_view word_to_clear) {
 	return word_to_clear.substr(start, end - start + 1);
 }
 
-RequestHandler::RequestHandler(TransportCatalogue& city_) :city(city_) {
+RequestHandler::RequestHandler(TransportCatalogue& city_) :city(city_), transport_router(router.GetGraph()){
 }
 
 void RequestHandler::AddStopFromHandler(const json::Dict& inf) {
@@ -109,7 +109,7 @@ Dict RequestHandler::StopOut(const json::Dict& input) {
 	}
 }
 
-json::Dict RequestHandler::RouteOut(const Dict &input, const TransportRouter& router, graph::Router<double>& transport_router) {
+json::Dict RequestHandler::RouteOut(const Dict &input, TransportRouter& router, graph::Router<double>& transport_router) {
     const string& from = string(Trim(input.at("from").AsString()));
     const string& to = string(Trim(input.at("to").AsString()));
     auto from_vertex = router.GetStopVertex(from);
@@ -156,9 +156,10 @@ Dict RequestHandler::MapOut(const json::Dict& input, ostringstream& stream) {
 void RequestHandler::TransportStat(json::Document& input) {
 	ofstream output("output.json", ios_base::out);
 	//output.open("output.json", ios_base::out);
-    TransportRouter router = TransportRouter(city);
+//    TransportRouter router = TransportRouter(city);
+  //  TransportRouter router(city);
 	const auto& req_info = input.GetRoot().AsDict();
-    graph::Router<double> transport_router(router.GetGraph());
+  //  graph::Router<double> transport_router(router.GetGraph());
 	Array result;
 	for (const auto& base_ : req_info.at("stat_requests"s).AsArray()) {
 		const auto& trans_inf = base_.AsDict();
@@ -173,11 +174,17 @@ void RequestHandler::TransportStat(json::Document& input) {
         }
 		else if (trans_inf.at("type"s).AsString() == "Map"s) {
 			ostringstream svg_res;
-			RenderSettings(input,  svg_res);
+			//RenderSettings(input,  svg_res);
+            for (const auto &bus: city.GetAllBus()) {
+                map_obj_.BusRender(bus.second);
+            }
+
+            map_obj_.SvgRender(svg_res);
 			result.emplace_back(MapOut(trans_inf, svg_res));
 		}
 	}
-	Print(Document(result), output);
+	//Print(Document(result), cout);
+    Print(Document(result), output);
 }
 
 svg::Color ToColor(const json::Node& node) {
@@ -203,56 +210,84 @@ svg::Color ToColor(const json::Node& node) {
 
 void RequestHandler::RenderSettings(json::Document& input, ostream& out) {
 	const auto& req_info = input.GetRoot().AsDict();
-	const auto& render_inf = req_info.at("render_settings"s).AsDict();
-	const auto& stops = city.GetAllStopWithBus();
-	vector<geo::Coordinates>coordinates;
-	for (const auto& stop : stops) {
-		coordinates.push_back(stop->coordinate);
-	}
-	SphereProjector projector(coordinates.begin(), coordinates.end(),
-		render_inf.at("width"s).AsDouble(), render_inf.at("height"s).AsDouble(),
-		render_inf.at("padding"s).AsDouble());
-	Label bus({ render_inf.at("bus_label_font_size"s).AsInt(),
-		{
-		render_inf.at("bus_label_offset"s).AsArray()[0].AsDouble(),
-		render_inf.at("bus_label_offset"s).AsArray()[1].AsDouble()
-		} });
-	Label stop({ render_inf.at("stop_label_font_size"s).AsInt(),
-		{
-render_inf.at("stop_label_offset"s).AsArray()[0].AsDouble(),
-render_inf.at("stop_label_offset"s).AsArray()[1].AsDouble()
-		} });
-
-	svg::Color underlayer = ToColor(render_inf.at("underlayer_color"s));
-	vector<svg::Color> colors;
-	for (const auto& col : render_inf.at("color_palette"s).AsArray()) {
-		colors.push_back(ToColor(col));
-	}
-
-	MapRender map_obj(projector, render_inf.at("line_width"s).AsDouble(),
-		render_inf.at("stop_radius"s).AsDouble(), bus, stop, underlayer,
-		render_inf.at("underlayer_width"s).AsDouble(), colors);
-
-	for (const auto& bus : city.GetAllBus()) {
-		map_obj.BusRender(bus.second);
-	}
-
-	map_obj.SvgRender(out);
-
-}
-
-void RequestHandler::TransportRouteSettings(Document &input) {
-    vector<tuple<string, vector<string>, bool>> buses;
-    vector<tuple<string, string, double>> stops_info;
-    const auto& req_info = input.GetRoot().AsDict();
-    for (const auto& base_ : req_info.at("routing_settings"s).AsDict()) {
-        if(base_.first == "bus_wait_time"s){
-            city.SetWaitTime(base_.second.AsInt());
-        }else if (base_.first == "bus_velocity"s){
-            city.SetBusVelocity(base_.second.AsDouble());
+    if(req_info.count("render_settings"s)) {
+        const auto &render_inf = req_info.at("render_settings"s).AsDict();
+        const auto &stops = city.GetAllStopWithBus();
+        vector<geo::Coordinates> coordinates;
+        for (const auto &stop: stops) {
+            coordinates.push_back(stop->coordinate);
         }
+        SphereProjector projector(coordinates.begin(), coordinates.end(),
+                                  render_inf.at("width"s).AsDouble(), render_inf.at("height"s).AsDouble(),
+                                  render_inf.at("padding"s).AsDouble());
+        Label bus({render_inf.at("bus_label_font_size"s).AsInt(),
+                   {
+                           render_inf.at("bus_label_offset"s).AsArray()[0].AsDouble(),
+                           render_inf.at("bus_label_offset"s).AsArray()[1].AsDouble()
+                   }});
+        Label stop({render_inf.at("stop_label_font_size"s).AsInt(),
+                    {
+                            render_inf.at("stop_label_offset"s).AsArray()[0].AsDouble(),
+                            render_inf.at("stop_label_offset"s).AsArray()[1].AsDouble()
+                    }});
+
+        svg::Color underlayer = ToColor(render_inf.at("underlayer_color"s));
+        vector<svg::Color> colors;
+        for (const auto &col: render_inf.at("color_palette"s).AsArray()) {
+            colors.push_back(ToColor(col));
+        }
+
+        MapRender map_obj(projector, render_inf.at("line_width"s).AsDouble(),
+                          render_inf.at("stop_radius"s).AsDouble(), bus, stop, underlayer,
+                          render_inf.at("underlayer_width"s).AsDouble(), colors);
+        map_obj_= move(map_obj);
+
+//        for (const auto &bus: city.GetAllBus()) {
+//            map_obj.BusRender(bus.second);
+//        }
+//
+//        map_obj.SvgRender(out);
     }
 
 }
 
+void RequestHandler::TransportRouteSettings(Document &input) {
+//    vector<tuple<string, vector<string>, bool>> buses;
+//    vector<tuple<string, string, double>> stops_info;
+    const auto& req_info = input.GetRoot().AsDict();
+    if(req_info.count("routing_settings"s)) {
+        for (const auto &base_: req_info.at("routing_settings"s).AsDict()) {
+            if (base_.first == "bus_wait_time"s) {
+                city.SetWaitTime(base_.second.AsInt());
+            } else if (base_.first == "bus_velocity"s) {
+                city.SetBusVelocity(base_.second.AsDouble());
+            }
+        }
+    }
+    router = TransportRouter(city);
+    transport_router = router.GetGraph();
+
+}
+
+void RequestHandler::SerializationSettings(json::Document& input) {
+    const auto &req_info = input.GetRoot().AsDict();
+    if(req_info.count("serialization_settings"s)) {
+        for (const auto &base_: req_info.at("serialization_settings"s).AsDict()) {
+            if (base_.first == "file"s) {
+                TransportSerialization::Serialization(city, map_obj_ ,base_.second.AsString(),
+                                                      router, transport_router);
+            }
+        }
+    }
+}
+
+void RequestHandler::DeserializationSettings(Document &input) {
+    const auto &req_info = input.GetRoot().AsDict();
+    for (const auto &base_: req_info.at("serialization_settings"s).AsDict()) {
+        if (base_.first == "file"s) {
+            TransportSerialization::Deserialization(city, map_obj_ ,base_.second.AsString(),
+                                                    router, transport_router);
+        }
+    }
+}
 

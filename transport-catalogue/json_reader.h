@@ -12,6 +12,9 @@ public:
 	JSONReader(TransportCatalogue& city_);
 	void ReadCatalogue(std::istream& input);
 	void ParseToCatalogue(json::Document& input);
+
+    void MakeBase(std::istream& input);
+    void ProcessRequest(std::istream& input);
 private:
 	TransportCatalogue& city;
 };
