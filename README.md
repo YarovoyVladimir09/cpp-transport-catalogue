@@ -1,7 +1,4 @@
 # cpp-transport-catalogue
-- Транспортный справочник, способный
-обрабатывать и выводить информацию в формате JSON. Также
-формирует картинку транспортных маршрутов в SVG формате
 - A transport catalogue capable
 of processing and displaying information in JSON format. It also
 generates an image of transport routes in SVG format and generate the optimal route between stops
@@ -9,7 +6,7 @@ generates an image of transport routes in SVG format and generate the optimal ro
 - C++17
 - SVG, JSON, C++, Protobuf
 
-input (make_base):
+**input (make_base)**:
   {
       "serialization_settings": {
           "file": "transport_catalogue.db"
@@ -180,7 +177,8 @@ input (make_base):
       ]
   }
   
-  input (process_requests):
+  
+ ** input (process_requests)**:
     {
       "serialization_settings": {
           "file": "transport_catalogue.db"
